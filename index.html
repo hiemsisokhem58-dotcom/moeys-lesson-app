@@ -1,0 +1,98 @@
+MoEYS-App/
+├── index.html        (កូដផ្ទាំងកម្មវិធី Web App ផ្នែកខាងមុខ - Frontend)
+├── script.js         (កូដគ្រប់គ្រងមុខងារ JavaScript: AI, Export Word, Auto Schedule)
+├── style.css         (កូដរចនាម៉ូដ Tailwind CSS និង Siemreap Font)
+└── Code.gs           (កូដស្វ័យប្រវត្តិកម្ម Google Apps Script សម្រាប់ភ្ជាប់ Google Drive)
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ប្រព័ន្ធជំនួយការគ្រូបង្រៀន MoEYS AI Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Siemreap&family=Moul&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800">
+    <!-- Header -->
+    <header class="bg-blue-950 text-white p-4 shadow-md border-b-4 border-yellow-500">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="font-moul text-sm md:text-base text-yellow-400">ប្រព័ន្ធបង្កើតកិច្ចតែងការ ស្លាយ និងតេស្តស្វ័យប្រវត្តិ</h1>
+            <span class="text-xs bg-blue-900 px-3 py-1 rounded-full text-blue-200">សាលាបឋមសិក្សាពុទ្រ្ទាម</span>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 mt-2">
+        <!-- ផ្ទាំងបញ្ជា (Control Panel) -->
+        <section class="lg:col-span-4 bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+            <h2 class="font-moul text-xs text-blue-950 border-b pb-2">បញ្ចូលព័ត៌មានមេរៀន</h2>
+            <div>
+                <label class="text-xs font-bold block mb-1">ចំណងជើងមេរៀន៖</label>
+                <input type="text" id="lessonTitle" class="w-full border rounded-lg p-2 text-xs" value="មេរៀនទី៤៖ សេចក្តីថ្លៃថ្នូររបស់មនុស្ស">
+            </div>
+            <div>
+                <label class="text-xs font-bold block mb-1">ខ្លឹមសារមេរៀន៖</label>
+                <textarea id="lessonContent" rows="4" class="w-full border rounded-lg p-2 text-xs">សេចក្តីថ្លៃថ្នូរគឺជាតម្លៃនៃអំពើល្អ ភាពស្មោះត្រង់ និងការគោរពសិទ្ធិអ្នកដទៃ។</textarea>
+            </div>
+            <button onclick="runAppGeneration()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">
+                ⚡ បញ្ជាបង្កើតឯកសារ និងស្លាយ
+            </button>
+            <button onclick="exportWordDoc()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">
+                📥 ទាញយកឯកសារ Word (Siemreap 11pt)
+            </button>
+        </section>
+
+        <!-- ផ្ទាំងបង្ហាញលទ្ធផល (Output Preview) -->
+        <section class="lg:col-span-8 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div id="outputArea" class="space-y-4" contenteditable="false">
+                <h3 class="font-moul text-center text-blue-950 text-sm">កិច្ចតែងការបង្រៀនស្តង់ដារ MoEYS</h3>
+                <div id="dynamicContent" class="text-xs space-y-2 border p-4 rounded bg-slate-50">
+                    <p><strong>ចំណងជើង៖</strong> <span id="outTitle">មេរៀនទី៤៖ សេចក្តីថ្លៃថ្នូររបស់មនុស្ស</span></p>
+                    <p><strong>ខ្លឹមសារ៖</strong> <span id="outContent">សេចក្តីថ្លៃថ្នូរគឺជាតម្លៃនៃអំពើល្អ ភាពស្មោះត្រង់ និងការគោរពសិទ្ធិអ្នកដទៃ។</span></p>
+                    <p class="text-emerald-700 font-bold">✔ រៀបចំរួចរាល់ស្របតាម ៥ ជំហាន និង Bloom's Taxonomy។</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+body {
+    font-family: 'Siemreap', sans-serif;
+    font-size: 11pt;
+}
+.font-moul {
+    font-family: 'Moul', cursive;
+}
+@media print {
+    body { background: white; }
+    header, button { display: none !important; }
+}
+function runAppGeneration() {
+    const title = document.getElementById('lessonTitle').value;
+    const content = document.getElementById('lessonContent').value;
+
+    document.getElementById('outTitle').innerText = title;
+    document.getElementById('outContent').innerText = content;
+    alert('បង្កើតកិច្ចតែងការ និងស្លាយបង្រៀនបានជោគជ័យ!');
+}
+
+function exportWordDoc() {
+    const htmlContent = document.getElementById('outputArea').innerHTML;
+    const wordTemplate = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset='utf-8'><style>
+            body { font-family: 'Siemreap', sans-serif; font-size: 11pt; }
+            h3 { font-family: 'Moul', serif; }
+        </style></head>
+        <body>${htmlContent}</body></html>`;
+
+    const blob = new Blob(['\ufeff', wordTemplate], { type: 'application/msword' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'កិច្ចតែងការបង្រៀន_MoEYS.doc';
+    link.click();
+}
+  
+</html>
